@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+
+import "google/protobuf/empty.proto"; 
+
+message WriteBlockRequest {
+    string name = 1;
+    bytes data = 2;
+}
+
+message WriteBlockResponse {
+    bool success = 1;
+}
+
+message ReadBlockRequest {
+    string name = 1;
+}
+
+message ReadBlockResponse {
+   repeated bytes data = 1;
+}
+
+message SendIndexRequest {
+    string filename = 1;
+} 
+
+message Response {
+    bool status = 1;
+}
+
+message Sended {
+    bool sended = 1;
+}
+
+message ReceiveDataRequest {
+    bytes block = 1; 
+    string filename = 2; 
+    string name = 3;
+}
+
+message ReceiveDataResponse {
+    bool success = 1;
+}
+
+service dataNode {
+    rpc WriteBlock(WriteBlockRequest) returns (WriteBlockResponse) {}
+    rpc ReadBlock(ReadBlockRequest) returns (ReadBlockResponse) {}
+    rpc CheckStatus (google.protobuf.Empty) returns (Response) {}
+    rpc SendIndex (SendIndexRequest) returns (Sended) {}
+    rpc ReceiveData (ReceiveDataRequest) returns (ReceiveDataResponse) {}
+}
