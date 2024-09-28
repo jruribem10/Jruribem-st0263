@@ -152,6 +152,8 @@ def rmdir():
         return jsonify({'message': f'Directorio {name} eliminado de {directory}'}), 200
     else:
         return jsonify({'error': 'Directorio no encontrado o no está vacío'}), 400
+    
+    
 @app.route('/rm', methods=['POST'])
 def rm():
     global database
