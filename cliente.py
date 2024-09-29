@@ -12,7 +12,7 @@ options = [
 file = []
 name = ""
 
-def upload_file(datanodes, file_name, file_address):
+def upload_file(datanodes, file_name, file_address, user, password):
     datanode_keys = list(datanodes.keys())
     datanode_count = len(datanode_keys)
 
@@ -24,6 +24,7 @@ def upload_file(datanodes, file_name, file_address):
         block_size = 1024 * 1024 
         block_index = 0
         arr_nodes = set()
+
         while True:
             block_data = file.read(block_size)
             if not block_data:
@@ -53,13 +54,11 @@ def upload_file(datanodes, file_name, file_address):
             node_info = datanodes[node]
             channel = grpc.insecure_channel("localhost:" + str(node_info['port']))
             stub = datanode_pb2_grpc.dataNodeStub(channel)
-            response = stub.SendIndex(datanode_pb2.SendIndexRequest(filename=file_name))
-# Variable global para rastrear el directorio actual
+            response = stub.SendIndex(datanode_pb2.SendIndexRequest(filename=file_name, user=user, password=password))
 current_directory = "/"
 
 def change_directory(new_directory):
     global current_directory
-    # Actualiza el directorio actual, simple validación
     if new_directory == "..":
         if current_directory != "/":
             current_directory = "/".join(current_directory.rstrip("/").split("/")[:-1])
@@ -144,6 +143,9 @@ def search(base_url):
             data = response.json()
             print(data)
             return data['dataNodes']
+        elif response.status_code == 403:
+            print("Unauthorized. Not your file.")
+            return {}
         else:
             print("File not found or error during search.")
             return {}
@@ -151,10 +153,10 @@ def search(base_url):
         print(f"Error during search: {e}")
         return {}
 
-def get_file(base_url, filename):
+def get_file(base_url, filename, user, password):
     global file, name
     try:
-        response = requests.get(f"{base_url}/get_file", json=filename)
+        response = requests.get(f"{base_url}/get_file", json={'filename': filename, 'user': user, 'password': password})
         if response.status_code == 200:
             print("Search successful. Available files:")
             data = response.json()
@@ -162,6 +164,8 @@ def get_file(base_url, filename):
             name = filename
             download_blocks()
             print(data)
+        elif response.status_code == 403:
+            print("Unauthorized. Not your file.")
         else:
             print("File not found or error during search.")
     except Exception as e:
@@ -170,23 +174,29 @@ def get_file(base_url, filename):
 def run():
     base_url = "http://localhost:5000"  
     
-    option = menu()
-    while option != 4:
+    option = None
+
+    user = input("Enter username: ")
+    password = input("Enter password: ")
+
+    while True:
+        option = menu()
+
         if option == "1":
             file_name = "test.png"
-            file_address = "C:/Users/jaime/OneDrive/Documentos/test.png"
+            file_address = "C:/Users/samir/Documents/septimo semestre/telematica/test.jpg" #cambiar valor quemado
             datanode = search(base_url)
 
             if len(datanode) == 0:
                 print("No DataNodes available. Aborting upload.")
                 continue
 
-            upload_file(datanode, file_name, file_address)
+            upload_file(datanode, file_name, file_address, user, password)
         elif option == "2":
             index(base_url)
         elif option == "3":
-            file_name = input("What is the name of the file to download?")
-            get_file(base_url, file_name)
+            file_name = input("What is the name of the file to download? ")
+            get_file(base_url, file_name, user, password)
         elif option == "4":
             new_directory = input("Enter the directory to navigate to: ")
             change_directory(new_directory)
@@ -217,6 +227,7 @@ def menu():
     print("8. Exit")
 
     return input("Select an option: ")
+
 
 if __name__ == '__main__':
     run()

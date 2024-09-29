@@ -22,6 +22,8 @@ message ReadBlockResponse {
 
 message SendIndexRequest {
     string filename = 1;
+    string user = 2;
+    string password = 3;
 } 
 
 message Response {
