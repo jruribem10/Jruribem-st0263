@@ -133,7 +133,6 @@ class dataNode(datanode_pb2_grpc.dataNodeServicer):
     
     def SendIndex(self, request, context):
         filename = request.filename
-        print('in sendindex datanode', filename)
         call_signal_method()
         if len(o_datanodes) > 1:
             node_c: dict[str, Any] = random.choice(o_datanodes)

@@ -4,7 +4,7 @@ import cmd
 import client
 
 class FileManagerCLI(cmd.Cmd):
-    intro = 'Welcome to the CLI. Type help or ? to list commands.\n'
+    intro = ''
     prompt = '(CLI) '
     base_url = "http://localhost:5000"
 
@@ -53,24 +53,24 @@ class FileManagerCLI(cmd.Cmd):
     def do_mkdir(self, dirname):
         """Create a new directory: mkdir <directory>"""
         try:
-            os.mkdir(dirname)
-            print(f"Directory {dirname} created.")
+            directory_name = input("Enter the name of the new directory: ")
+            client.create_directory(self.base_url, directory_name)
         except Exception as e:
             print(f"Error creating directory: {e}")
     
     def do_rmdir(self, dirname):
         """Remove an empty directory: rmdir <directory>"""
         try:
-            os.rmdir(dirname)
-            print(f"Directory {dirname} removed.")
+            directory_name = input("Enter the name of the directory to remove: ")
+            client.remove_directory(self.base_url, directory_name)
         except Exception as e:
             print(f"Error removing directory: {e}")
     
     def do_rm(self, filename):
         """Remove a file: rm <file>"""
         try:
-            os.remove(filename)
-            print(f"File {filename} removed.")
+            file_name = input("Enter the name of the file to remove: ")
+            client.remove_file(self.base_url, file_name)
         except Exception as e:
             print(f"Error removing file: {e}")
     
@@ -81,10 +81,28 @@ class FileManagerCLI(cmd.Cmd):
     
     def do_upload(self, file_name):
         """Upload a file to a datanode"""
-        datanode = client.search(self.base_url)
-        print('inside upload, filename: ', file_name)
-        if len(datanode) == 0:
-            print("No DataNodes available. Aborting upload.")
-            return
+        try :
+            datanode = client.search(self.base_url)
+            print('inside upload, filename: ', file_name)
+            if len(datanode) == 0:
+                print("No DataNodes available. Aborting upload.")
+                return
 
-        client.upload_file(datanode, file_name, f'{os.getcwd()}/{file_name}', self.user, self.password)
+            client.upload_file(datanode, file_name, f'{os.getcwd()}/{file_name}', self.user, self.password)
+        except Exception:
+            print("Error uploading. Try again")
+    
+    def do_welcome(self, args=None):
+        print("Welcome to the CLI")
+        print("------------------------------------------------------------")
+        print("* Available commands: ")
+        print("* cd - navigate through local directories")
+        print('* ls - list files inside current dierctory')
+        print('* upload <filename.ext - upload file to network')
+        print('* get <filename.ext> - get a file you uploaded from network')
+        print('* mkdir <dir> - create directory')
+        print('* rm <file> - remove file')
+        print('* welcome - prints welcome message')
+        print('* exit - exits')
+        
+

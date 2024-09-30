@@ -235,4 +235,5 @@ def menu():
 if __name__ == '__main__':
     cli_instance = cli.FileManagerCLI()
     cli_instance.get_credentials()
+    cli_instance.do_welcome()
     cli_instance.cmdloop()
