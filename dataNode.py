@@ -1,4 +1,3 @@
-
 import random
 import string
 from concurrent import futures
@@ -53,7 +52,9 @@ def save_data_namenode(parameters):
         'name': parameters['name'],
         'port': parameters['port'],
         'copy': parameters['copy'],
-        'port_copy': parameters['port_copy']
+        'port_copy': parameters['port_copy'],
+        'user': parameters['user'],
+        'password': parameters['password']
     }
     response = requests.post(url, json=data)
     message = response.json()
@@ -141,10 +142,12 @@ class dataNode(datanode_pb2_grpc.dataNodeServicer):
             node_c = o_datanodes[0]
         self.block_storage[filename]['copy'] = node_c['name']
         self.block_storage[filename]['port_copy'] = node_c['port']
+        self.block_storage[filename]['user'] = request.user
+        self.block_storage[filename]['password'] = request.password
         send_data_to_datanode(self.block_storage, filename)
-        for key in self.block_storage.keys():
-            save_data_namenode(self.block_storage[key])
-            return datanode_pb2.Sended(sended=True)
+        #for key in self.block_storage.keys(): this was a bug 
+        save_data_namenode(self.block_storage[filename])
+        return datanode_pb2.Sended(sended=True)
 
 
 def serve():

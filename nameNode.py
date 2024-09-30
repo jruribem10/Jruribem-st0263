@@ -1,4 +1,3 @@
-
 import datanode_pb2
 import datanode_pb2_grpc
 import grpc
@@ -11,7 +10,7 @@ dataNodes = {}
 database = {}
 not_available = []
 
-# Funciones auxiliares
+
 def send_request(name) -> list[str]:
     datanodes = []
     for key in dataNodes.keys():
@@ -34,6 +33,7 @@ def send_request(name) -> list[str]:
         dataNodes.pop(node)
     return datanodes
 
+
 def drop_datanode() -> None:
     global dataNodes, not_available
     for key in dataNodes.keys():
@@ -53,7 +53,7 @@ def drop_datanode() -> None:
     for node in not_available:
         dataNodes.pop(node)
 
-# REST server
+
 @app.route('/login', methods=['POST'])
 def login():
     global dataNodes
@@ -62,6 +62,7 @@ def login():
     port = data["port"]
     dataNodes[datanode] = {"name": datanode, "port": port}
     return jsonify({'message': 'DataNode Register successful', 'Name': datanode, 'Port': port}), 200
+
 
 @app.route('/signal', methods=['GET'])
 def signal():
@@ -76,6 +77,7 @@ def signal():
     else:
         return jsonify({'error': 'There are not datanode available'}), 404
 
+
 @app.route('/save_data', methods=['POST'])
 def save_data():
     global database
@@ -84,12 +86,17 @@ def save_data():
     filename = data['filename']
     port = data['port']
     copy = data['copy']
+    user = data['user']
+    password = data['password']
     port_copy = data['port_copy']
+
+    print("in namenode: ", filename)
     if filename not in database:
-        database[filename] = [{'Filename': filename, 'Datanode Name': name, 'Port': port, 'Copy': copy, 'Port Copy': port_copy}]
+        database[filename] = [{'Filename': filename, 'Datanode Name': name, 'Port': port, 'Copy': copy, 'Port Copy': port_copy, 'user': user, 'password': password}]
     else:
-        database[filename].append({'Filename': filename, 'Datanode Name': name, 'Port': port, 'Copy': copy, 'Port Copy': port_copy})
+        database[filename].append({'Filename': filename, 'Datanode Name': name, 'Port': port, 'Copy': copy, 'Port Copy': port_copy, 'user': user, 'password': password})
     return jsonify({'message': 'File Register successful', 'Name': filename, 'Port': port}), 200
+
 
 @app.route('/search', methods=['GET'])
 def search():
@@ -98,11 +105,16 @@ def search():
     except Exception as e:
         return jsonify({'error': 'We cannot find any available datanode'}), 404
 
+
 @app.route('/get_file', methods=['GET'])
 def get_file():
     drop_datanode()
-    filename = request.json
+    filename = request.json['filename']
+    user = request.json['user']
+    password = request.json['password']
     if filename in database:
+        if database[filename][0]['user'] != user or database[filename][0]['password'] != password:
+            return jsonify({'message': 'invalid credentials'}), 403 
         info = database[filename]
         for node in info:
             node['leader_available'] = node['Datanode Name'] not in not_available
@@ -122,6 +134,7 @@ def index():
     else:
         return jsonify({'error': 'We cannot find any file'}), 404
     
+
 @app.route('/mkdir', methods=['POST'])
 def mkdir():
     global database
@@ -139,6 +152,7 @@ def mkdir():
     else:
         return jsonify({'error': 'Directorio ya existe'}), 400
     
+
 @app.route('/rmdir', methods=['POST'])
 def rmdir():
     global database
@@ -152,6 +166,8 @@ def rmdir():
         return jsonify({'message': f'Directorio {name} eliminado de {directory}'}), 200
     else:
         return jsonify({'error': 'Directorio no encontrado o no está vacío'}), 400
+    
+    
 @app.route('/rm', methods=['POST'])
 def rm():
     global database
@@ -165,7 +181,6 @@ def rm():
         return jsonify({'message': f'Archivo {file_name} eliminado de {directory}'}), 200
     else:
         return jsonify({'error': 'Archivo no encontrado'}), 400
-
 
 
 if __name__ == '__main__':
