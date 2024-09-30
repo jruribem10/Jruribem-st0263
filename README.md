@@ -14,10 +14,6 @@ Este sistema está compuesto por un NameNode, que se encarga de gestionar el alm
 El cliente se comunica con el sistema a través de una interfaz de comandos (CLI) que ofrece funcionalidades como cargar, descargar, listar archivos, crear y eliminar directorios, y otras operaciones comunes de manejo de archivos.
 
 
-## Aspectos Cumplidos
-
-
-## Aspectos No Cumplidos
 
 
 ## Información General
@@ -105,4 +101,4 @@ ara ejecutar este proyecto, asegúrate de instalar las siguientes dependencias:
 
 
 
-### Imagenes
+
