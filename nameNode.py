@@ -89,6 +89,8 @@ def save_data():
     user = data['user']
     password = data['password']
     port_copy = data['port_copy']
+
+    print("in namenode: ", filename)
     if filename not in database:
         database[filename] = [{'Filename': filename, 'Datanode Name': name, 'Port': port, 'Copy': copy, 'Port Copy': port_copy, 'user': user, 'password': password}]
     else:
@@ -119,7 +121,6 @@ def get_file():
     else:
         return jsonify({'message': 'File not found', 'filename' : filename}), 200
     try:
-        print('todo good')
         return jsonify({'message': 'This file is in this datanodes', 'Nodes': database[filename]}), 200
     except Exception as e:
         return jsonify({'error': 'We cannot find any available datanode'}), 404

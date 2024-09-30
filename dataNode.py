@@ -132,8 +132,8 @@ class dataNode(datanode_pb2_grpc.dataNodeServicer):
         return datanode_pb2.Response(status=True)
     
     def SendIndex(self, request, context):
-        print(request.user, request.password)
         filename = request.filename
+        print('in sendindex datanode', filename)
         call_signal_method()
         if len(o_datanodes) > 1:
             node_c: dict[str, Any] = random.choice(o_datanodes)
@@ -145,12 +145,10 @@ class dataNode(datanode_pb2_grpc.dataNodeServicer):
         self.block_storage[filename]['port_copy'] = node_c['port']
         self.block_storage[filename]['user'] = request.user
         self.block_storage[filename]['password'] = request.password
-        print('entro a replicacion')
         send_data_to_datanode(self.block_storage, filename)
-        print('salio de replicacion')
-        for key in self.block_storage.keys():
-            save_data_namenode(self.block_storage[key])
-            return datanode_pb2.Sended(sended=True)
+        #for key in self.block_storage.keys(): this was a bug 
+        save_data_namenode(self.block_storage[filename])
+        return datanode_pb2.Sended(sended=True)
 
 
 def serve():

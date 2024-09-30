@@ -162,7 +162,6 @@ def get_file(base_url, filename, user, password):
         if response.status_code == 200:
             print("Search successful. Available files:")
             data = response.json()
-            print("DATAAAAA:", data)
             file = data['Nodes']
             name = filename
             download_blocks()

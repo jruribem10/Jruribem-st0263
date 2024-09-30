@@ -82,7 +82,7 @@ class FileManagerCLI(cmd.Cmd):
     def do_upload(self, file_name):
         """Upload a file to a datanode"""
         datanode = client.search(self.base_url)
-
+        print('inside upload, filename: ', file_name)
         if len(datanode) == 0:
             print("No DataNodes available. Aborting upload.")
             return
